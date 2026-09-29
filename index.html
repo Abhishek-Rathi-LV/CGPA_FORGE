@@ -1,0 +1,2412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPU CGPA Calculator 2026 — SGPA & CGPA Calculator | CGPAForge</title>
+  <meta name="description" content="Calculate IPU SGPA and CGPA using the official IPU grading system. Enter credits and marks to calculate grade points, percentage equivalent, target CGPA, and what-if simulations." />
+  <!-- Set the canonical URL to your actual deployed URL before publishing. -->
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="IPU CGPA Calculator — SGPA, CGPA & Grade Planner | CGPAForge" />
+  <meta property="og:description" content="Calculate IPU SGPA and CGPA according to Guru Gobind Singh Indraprastha University (GGSIPU) regulations. Accurate credit-weighted calculations, percentage conversion, and grade forecasting." />
+  <!-- Set og:image to a real hosted preview image when available. -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#0A0A0A" />
+
+  <!-- Google Fonts: Outfit (UI) + IBM Plex Mono (Instrument Data Readout) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- React 18 & ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- HTML2Canvas & jsPDF for Client-side PDF / PNG Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Tailwind Custom Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#0A0A0A',
+              offwhite: '#F4F4F0',
+              white: '#FFFFFF',
+              lime: '#CCFF00',
+              pink: '#FF66CC',
+              blue: '#3366FF',
+              yellow: '#FFB800',
+              red: '#FF3333',
+              green: '#00AA44',
+              cream: '#FFF8E7',
+              border: '#0A0A0A',
+            }
+          },
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'hard-sm': '2px 2px 0px #0A0A0A',
+            'hard': '3px 3px 0px #0A0A0A',
+            'hard-lg': '5px 5px 0px #0A0A0A',
+            'hard-xl': '7px 7px 0px #0A0A0A',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Structured Data JSON-LD for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CGPAForge IPU Calculator",
+    "url": "",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "All modern web browsers",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    },
+    "description": "Accurate, credit-weighted IPU SGPA, CGPA, target planner, and percentage equivalent calculator for Guru Gobind Singh Indraprastha University (GGSIPU)."
+  }
+  </script>
+
+  <style>
+    /* Neo-editorial brutalist styling rules */
+    body {
+      background-color: #F4F4F0;
+      color: #0A0A0A;
+      font-family: 'Outfit', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      padding: 0;
+    }
+
+    .border-hard {
+      border: 2px solid #0A0A0A;
+    }
+    .border-hard-thick {
+      border: 3px solid #0A0A0A;
+    }
+
+    .print-transcript-container { position: absolute; left: -99999px; top: 0; }
+    @media print { .print-transcript-container { position: static; } }
+    /* Print media optimization */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #transcript-export-area, #transcript-export-area * {
+        visibility: visible;
+      }
+      #transcript-export-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    /* Custom focus outlines for high accessibility */
+    input:focus, select:focus, button:focus {
+      outline: 2px solid #0A0A0A !important;
+      outline-offset: 1px !important;
+    }
+
+    /* Smooth table scroll for small mobile screens without shifting page */
+    .table-container {
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #0A0A0A #F4F4F0;
+    }
+    .table-container::-webkit-scrollbar {
+      height: 6px;
+    }
+    .table-container::-webkit-scrollbar-track {
+      background: #F4F4F0;
+    }
+    .table-container::-webkit-scrollbar-thumb {
+      background: #0A0A0A;
+    }
+  </style>
+</head>
+<body class="bg-brand-offwhite text-brand-black min-h-screen">
+  <div id="root"></div>
+
+  <!-- Main React Application Script -->
+  <script type="text/babel">
+    const IPU_RULES = {
+      name: "Guru Gobind Singh Indraprastha University (GGSIPU)",
+      gradingScale: [
+        { min: 90, max: 100, grade: "O",  point: 10, description: "Outstanding" },
+        { min: 75, max: 89,  grade: "A+", point: 9,  description: "Excellent" },
+        { min: 65, max: 74,  grade: "A",  point: 8,  description: "Very Good" },
+        { min: 55, max: 64,  grade: "B+", point: 7,  description: "Good" },
+        { min: 50, max: 54,  grade: "B",  point: 6,  description: "Above Average" },
+        { min: 45, max: 49,  grade: "C",  point: 5,  description: "Average" },
+        { min: 40, max: 44,  grade: "P",  point: 4,  description: "Pass" },
+        { min: 0,  max: 39,  grade: "F",  point: 0,  description: "Fail" }
+      ],
+      getGradeInfoByMarks(marks) {
+        if (marks === null || marks === undefined || isNaN(marks) || marks < 0 || marks > 100) {
+          return null;
+        }
+        const numeric = Number(marks);
+        for (const item of this.gradingScale) {
+          if (numeric >= item.min && numeric <= item.max) {
+            return item;
+          }
+        }
+        return { grade: "F", point: 0, description: "Fail" };
+      },
+      getGradeInfoByGrade(gradeStr) {
+        const found = this.gradingScale.find(g => g.grade.toUpperCase() === gradeStr.trim().toUpperCase());
+        return found || { grade: "F", point: 0, description: "Fail" };
+      },
+      calculateDivision(cgpa) {
+        if (cgpa >= 10.0) {
+          return {
+            title: "Exemplary Performance",
+            detail: "Subject to conditions specified in IPU Ordinance 11 (first attempt passing of all courses)."
+          };
+        } else if (cgpa >= 6.50) {
+          return {
+            title: "First Division",
+            detail: "Eligible for standard First Class honors criteria across IPU colleges."
+          };
+        } else if (cgpa >= 5.00) {
+          return {
+            title: "Second Division",
+            detail: "Satisfies degree award requirements for Second Division."
+          };
+        } else if (cgpa >= 4.00) {
+          return {
+            title: "Third Division",
+            detail: "Minimum qualifying division for award of undergraduate/postgraduate degree."
+          };
+        } else {
+          return {
+            title: "Not Qualified",
+            detail: "CGPA below 4.00 does not meet the minimum standard for degree completion."
+          };
+        }
+      },
+      percentageEquivalent(cgpa) {
+        // Source of truth: Percentage = CGPA * 10
+        return (cgpa * 10).toFixed(2);
+      }
+    };
+
+    const SAMPLE_SEMESTER_SUBJECTS = [
+      { id: "s1", code: "IT-201", name: "Data Structures & Algorithms", credits: 4, mode: "marks", marks: 84, grade: "A+", point: 9 },
+      { id: "s2", code: "IT-203", name: "Database Management Systems", credits: 4, mode: "marks", marks: 78, grade: "A+", point: 9 },
+      { id: "s3", code: "IT-205", name: "Computer Architecture", credits: 4, mode: "marks", marks: 68, grade: "A", point: 8 },
+      { id: "s4", code: "BA-211", name: "Principles of Management", credits: 3, mode: "marks", marks: 72, grade: "A", point: 8 },
+      { id: "s5", code: "IT-251", name: "Data Structures Lab", credits: 1, mode: "marks", marks: 92, grade: "O", point: 10 },
+      { id: "s6", code: "IT-253", name: "DBMS Laboratory", credits: 1, mode: "marks", marks: 91, grade: "O", point: 10 }
+    ];
+
+    const SAMPLE_MULTI_SEMESTERS = [
+      { id: "sem-1", name: "Semester 1", sgpa: 8.25, credits: 24 },
+      { id: "sem-2", name: "Semester 2", sgpa: 8.70, credits: 24 },
+      { id: "sem-3", name: "Semester 3", sgpa: 8.45, credits: 26 },
+      { id: "sem-4", name: "Semester 4", sgpa: 8.90, credits: 26 }
+    ];
+
+    const DEFAULT_SUBJECTS = Array.from({ length: 8 }, (_, i) => ({
+      id: `default-subject-${i + 1}`, code: `SUB-${i + 1}`, name: `Subject ${i + 1}`,
+      credits: 4, mode: "marks", marks: "", grade: "—", point: null
+    }));
+    const readStoredArray = (key, fallback) => {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key));
+        return Array.isArray(stored) ? stored : fallback;
+      } catch { return fallback; }
+    };
+
+    function App() {
+      const [activeTab, setActiveTab] = useState("sgpa"); // "sgpa" | "cgpa" | "target" | "whatif" | "scale" | "history"
+
+      // SGPA state
+      const [subjects, setSubjects] = useState(() => {
+        const stored = readStoredArray("cgpaforge_current_subjects", null);
+        const migrationKey = "cgpaforge_blank_default_v2";
+
+        // Never show fabricated marks/SGPA on a fresh calculator.
+        // Migrate only known starter/sample datasets from older builds; preserve any real user-entered work.
+        if (!localStorage.getItem(migrationKey)) {
+          localStorage.setItem(migrationKey, "1");
+          const isOldTwoRowStarter = stored && stored.length === 2 && stored.every((s, i) => s.name === `Subject ${i + 1}`);
+          const isKnownSample = stored && stored.length === SAMPLE_SEMESTER_SUBJECTS.length &&
+            stored.every((s, i) => s.name === SAMPLE_SEMESTER_SUBJECTS[i].name && Number(s.marks) === SAMPLE_SEMESTER_SUBJECTS[i].marks);
+          if (isOldTwoRowStarter || isKnownSample) return DEFAULT_SUBJECTS.map(s => ({ ...s }));
+        }
+        return stored || DEFAULT_SUBJECTS.map(s => ({ ...s }));
+      });
+      const [semesterTitle, setSemesterTitle] = useState("Current IPU Semester");
+
+      // Multi-semester CGPA state
+      const [semesters, setSemesters] = useState(() => {
+        return readStoredArray("cgpaforge_current_semesters", SAMPLE_MULTI_SEMESTERS);
+      });
+
+      // Target CGPA state
+      const [targetCurrentCGPA, setTargetCurrentCGPA] = useState(7.85);
+      const [targetCompletedCredits, setTargetCompletedCredits] = useState(72);
+      const [targetRemainingCredits, setTargetRemainingCredits] = useState(48);
+      const [targetDesiredCGPA, setTargetDesiredCGPA] = useState(8.50);
+
+      // What-If Simulator state
+      const [whatIfSubjectId, setWhatIfSubjectId] = useState("");
+      const [whatIfHypotheticalGrade, setWhatIfHypotheticalGrade] = useState("O");
+
+      // Quick Marks -> Grade finder
+      const [quickMarksInput, setQuickMarksInput] = useState(82);
+
+      // Calculation History state
+      const [history, setHistory] = useState(() => {
+        return readStoredArray("cgpaforge_history", []);
+      });
+      const [saveLabel, setSaveLabel] = useState("");
+      const [showSaveToast, setShowSaveToast] = useState(false);
+      const [showResetModal, setShowResetModal] = useState(false);
+      const [showCalculationsBreakdown, setShowCalculationsBreakdown] = useState(true);
+
+      // Persist ongoing work locally
+      useEffect(() => {
+        localStorage.setItem("cgpaforge_current_subjects", JSON.stringify(subjects));
+      }, [subjects]);
+
+      useEffect(() => {
+        localStorage.setItem("cgpaforge_current_semesters", JSON.stringify(semesters));
+      }, [semesters]);
+
+      useEffect(() => {
+        localStorage.setItem("cgpaforge_history", JSON.stringify(history));
+      }, [history]);
+
+      // Initialize default whatIfSubjectId when subjects load
+      useEffect(() => {
+        if (subjects.length > 0 && !whatIfSubjectId) {
+          setWhatIfSubjectId(subjects[0].id);
+        }
+      }, [subjects, whatIfSubjectId]);
+
+      // Render Lucide icons on update
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      const calculateSGPAMetrics = (subjList) => {
+        let totalCredits = 0;
+        let totalQualityPoints = 0;
+        let validSubjectsCount = 0;
+        let hasErrors = false;
+
+        subjList.forEach(s => {
+          const cred = parseFloat(s.credits);
+          const pt = s.point === null || s.point === "" ? NaN : parseFloat(s.point);
+          const validMarks = s.mode !== "marks" || (s.marks !== "" && Number.isFinite(Number(s.marks)) && Number(s.marks) >= 0 && Number(s.marks) <= 100);
+
+          if (validMarks && !isNaN(cred) && cred > 0 && !isNaN(pt) && pt >= 0 && pt <= 10) {
+            totalCredits += cred;
+            totalQualityPoints += (cred * pt);
+            validSubjectsCount++;
+          } else {
+            hasErrors = true;
+          }
+        });
+
+        const sgpa = totalCredits > 0 ? (totalQualityPoints / totalCredits) : 0;
+        const roundedSGPA = Math.round(sgpa * 100) / 100;
+        const percentage = totalCredits > 0 ? (roundedSGPA * 10).toFixed(2) : "0.00";
+        const division = validSubjectsCount > 0 && !hasErrors ? IPU_RULES.calculateDivision(roundedSGPA) : { title: "—", detail: "Complete all subject entries to view a result." };
+
+        return {
+          totalCredits,
+          totalQualityPoints: Math.round(totalQualityPoints * 100) / 100,
+          sgpa: validSubjectsCount > 0 && !hasErrors ? roundedSGPA.toFixed(2) : "—",
+          numericSGPA: roundedSGPA,
+          percentage: validSubjectsCount > 0 && !hasErrors ? percentage : "—",
+          division,
+          validCount: validSubjectsCount,
+          hasErrors
+        };
+      };
+
+      const currentSGPAMetrics = useMemo(() => calculateSGPAMetrics(subjects), [subjects]);
+      const hasEnteredMarks = subjects.some(s => s.mode === "marks" && s.marks !== "" && s.marks !== null && s.marks !== undefined);
+
+      const calculateCGPAMetrics = (semList) => {
+        let totalCredits = 0;
+        let totalWeightedPoints = 0;
+        let validCount = 0;
+
+        semList.forEach(sem => {
+          const cred = parseFloat(sem.credits);
+          const sgpa = parseFloat(sem.sgpa);
+          if (!isNaN(cred) && cred > 0 && !isNaN(sgpa) && sgpa >= 0 && sgpa <= 10) {
+            totalCredits += cred;
+            totalWeightedPoints += (cred * sgpa);
+            validCount++;
+          }
+        });
+
+        const cgpa = totalCredits > 0 ? (totalWeightedPoints / totalCredits) : 0;
+        const roundedCGPA = Math.round(cgpa * 100) / 100;
+        const percentage = totalCredits > 0 ? (roundedCGPA * 10).toFixed(2) : "0.00";
+        const division = IPU_RULES.calculateDivision(roundedCGPA);
+
+        return {
+          totalCredits,
+          totalWeightedPoints: Math.round(totalWeightedPoints * 100) / 100,
+          cgpa: roundedCGPA.toFixed(2),
+          numericCGPA: roundedCGPA,
+          percentage,
+          division,
+          validCount
+        };
+      };
+
+      const currentCGPAMetrics = useMemo(() => calculateCGPAMetrics(semesters), [semesters]);
+
+      const targetAnalysis = useMemo(() => {
+        const curCGPA = parseFloat(targetCurrentCGPA);
+        const compCred = parseFloat(targetCompletedCredits);
+        const remCred = parseFloat(targetRemainingCredits);
+        const desCGPA = parseFloat(targetDesiredCGPA);
+
+        if (isNaN(curCGPA) || isNaN(compCred) || isNaN(remCred) || isNaN(desCGPA) ||
+            compCred <= 0 || remCred <= 0 || desCGPA <= 0 || curCGPA < 0) {
+          return { valid: false, error: "Please enter valid numeric values for credits and CGPA." };
+        }
+
+        const totalCredits = compCred + remCred;
+        const currentPoints = curCGPA * compCred;
+        const targetTotalPoints = desCGPA * totalCredits;
+        const requiredFuturePoints = targetTotalPoints - currentPoints;
+        const requiredAvgSGPA = requiredFuturePoints / remCred;
+        const roundedReq = Math.round(requiredAvgSGPA * 100) / 100;
+
+          const isPossible = requiredAvgSGPA <= 10.0 + 1e-9;
+        const isAlreadyAchieved = roundedReq <= 0;
+
+        return {
+          valid: true,
+          totalCredits,
+          currentPoints: currentPoints.toFixed(2),
+          targetTotalPoints: targetTotalPoints.toFixed(2),
+          requiredFuturePoints: requiredFuturePoints.toFixed(2),
+          requiredAvgSGPA: roundedReq.toFixed(2),
+          numericRequired: roundedReq,
+          isPossible,
+          isAlreadyAchieved
+        };
+      }, [targetCurrentCGPA, targetCompletedCredits, targetRemainingCredits, targetDesiredCGPA]);
+
+      const whatIfMetrics = useMemo(() => {
+        if (!whatIfSubjectId || subjects.length === 0) return null;
+        const targetSubj = subjects.find(s => s.id === whatIfSubjectId);
+        if (!targetSubj) return null;
+
+        const simulatedInfo = IPU_RULES.getGradeInfoByGrade(whatIfHypotheticalGrade);
+        const modifiedList = subjects.map(s => {
+          if (s.id === whatIfSubjectId) {
+            return {
+              ...s,
+              grade: simulatedInfo.grade,
+              point: simulatedInfo.point
+            };
+          }
+          return s;
+        });
+
+        const simMetrics = calculateSGPAMetrics(modifiedList);
+        const currentSGPA = parseFloat(currentSGPAMetrics.sgpa);
+        const simulatedSGPA = parseFloat(simMetrics.sgpa);
+        const difference = (simulatedSGPA - currentSGPA).toFixed(2);
+
+        return {
+          targetSubject: targetSubj,
+          simulatedGrade: simulatedInfo.grade,
+          simulatedPoint: simulatedInfo.point,
+          simulatedSGPA: simMetrics.sgpa,
+          difference: Number(difference) > 0 ? `+${difference}` : difference,
+          isGain: Number(difference) > 0,
+          isLoss: Number(difference) < 0
+        };
+      }, [subjects, whatIfSubjectId, whatIfHypotheticalGrade, currentSGPAMetrics]);
+
+      const handleAddSubject = () => {
+        const newId = "subj_" + Date.now();
+        const newSubj = {
+          id: newId,
+          code: `SUB-${subjects.length + 1}`,
+          name: `Course ${subjects.length + 1}`,
+          credits: 4,
+          mode: "marks",
+          marks: "",
+          grade: "—",
+          point: null
+        };
+        setSubjects([...subjects, newSubj]);
+      };
+
+      const handleRemoveSubject = (id) => {
+        if (subjects.length <= 1) {
+          return;
+        }
+        setSubjects(subjects.filter(s => s.id !== id));
+      };
+
+      const handleSubjectChange = (id, field, value) => {
+        setSubjects(prev => prev.map(s => {
+          if (s.id !== id) return s;
+          const updated = { ...s };
+
+          if (field === "name") {
+            updated.name = value;
+          } else if (field === "credits") {
+            const num = value === "" ? "" : parseFloat(value);
+            updated.credits = isNaN(num) ? 0 : num;
+          } else if (field === "mode") {
+            updated.mode = value;
+            if (value === "marks") {
+              const info = updated.marks !== "" ? IPU_RULES.getGradeInfoByMarks(updated.marks) : null;
+              updated.grade = info ? info.grade : "—";
+              updated.point = info ? info.point : null;
+            } else {
+              const info = IPU_RULES.getGradeInfoByGrade(updated.grade === "—" ? "O" : updated.grade);
+              updated.grade = info.grade;
+              updated.point = info.point;
+            }
+          } else if (field === "marks") {
+            const num = value === "" ? "" : parseFloat(value);
+            updated.marks = isNaN(num) ? "" : num;
+            if (num !== "" && !isNaN(num) && num >= 0 && num <= 100) {
+              const info = IPU_RULES.getGradeInfoByMarks(num);
+              if (info) {
+                updated.grade = info.grade;
+                updated.point = info.point;
+              }
+            } else {
+              updated.grade = "—";
+              updated.point = null;
+            }
+          } else if (field === "grade") {
+            const info = IPU_RULES.getGradeInfoByGrade(value);
+            updated.grade = info.grade;
+            updated.point = info.point;
+          }
+
+          return updated;
+        }));
+      };
+
+      const handleAddSemester = () => {
+        const semCount = semesters.length + 1;
+        const newSem = {
+          id: "sem_" + Date.now(),
+          name: `Semester ${semCount}`,
+          sgpa: 8.00,
+          credits: 24
+        };
+        setSemesters([...semesters, newSem]);
+      };
+
+      const handleRemoveSemester = (id) => {
+        if (semesters.length <= 1) return;
+        setSemesters(semesters.filter(sem => sem.id !== id));
+      };
+
+      const handleSemesterChange = (id, field, value) => {
+        setSemesters(prev => prev.map(sem => {
+          if (sem.id !== id) return sem;
+          const updated = { ...sem };
+          if (field === "name") {
+            updated.name = value;
+          } else if (field === "sgpa") {
+            const num = value === "" ? "" : parseFloat(value);
+            updated.sgpa = isNaN(num) ? 0 : num;
+          } else if (field === "credits") {
+            const num = value === "" ? "" : parseFloat(value);
+            updated.credits = isNaN(num) ? 0 : num;
+          }
+          return updated;
+        }));
+      };
+
+      const handleSaveCalculation = () => {
+        const title = saveLabel.trim() || semesterTitle || `Saved Calculation ${history.length + 1}`;
+        const newRecord = {
+          id: "hist_" + Date.now(),
+          date: new Date().toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" }),
+          title,
+          type: activeTab === "cgpa" ? "CGPA" : "SGPA",
+          score: activeTab === "cgpa" ? currentCGPAMetrics.cgpa : currentSGPAMetrics.sgpa,
+          credits: activeTab === "cgpa" ? currentCGPAMetrics.totalCredits : currentSGPAMetrics.totalCredits,
+          subjects: [...subjects],
+          semesters: [...semesters]
+        };
+
+        setHistory([newRecord, ...history]);
+        setSaveLabel("");
+        setShowSaveToast(true);
+        setTimeout(() => setShowSaveToast(false), 3000);
+      };
+
+      const handleLoadHistory = (item) => {
+        if (item.subjects && item.subjects.length > 0) {
+          setSubjects(item.subjects);
+        }
+        if (item.semesters && item.semesters.length > 0) {
+          setSemesters(item.semesters);
+        }
+        if (item.type === "CGPA") {
+          setActiveTab("cgpa");
+        } else {
+          setActiveTab("sgpa");
+        }
+        setSemesterTitle(item.title);
+      };
+
+      const handleDeleteHistory = (id) => {
+        setHistory(history.filter(h => h.id !== id));
+      };
+
+      const handleResetCalculator = () => {
+        const freshSubjects = DEFAULT_SUBJECTS.map(s => ({ ...s }));
+        setSubjects(freshSubjects);
+        localStorage.setItem("cgpaforge_current_subjects", JSON.stringify(freshSubjects));
+        setSemesterTitle("Current IPU Semester");
+        setShowResetModal(false);
+      };
+
+      const handleLoadSample = () => {
+        setSubjects(SAMPLE_SEMESTER_SUBJECTS);
+        setSemesterTitle("B.Tech / BCA - Sample Semester");
+      };
+
+      const handlePrint = () => {
+        window.print();
+      };
+
+      const [exportError, setExportError] = useState("");
+      const [isExporting, setIsExporting] = useState(false);
+      const handleExportPDF = async () => {
+        setExportError("");
+        if (currentSGPAMetrics.hasErrors || currentSGPAMetrics.validCount === 0) {
+          setExportError("Complete every subject's marks or grade and credits before exporting.");
+          return;
+        }
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+          setExportError("PDF library could not load. Check your internet connection and retry.");
+          return;
+        }
+
+        setIsExporting(true);
+        try {
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "a4",
+            compress: true
+          });
+
+          const W = 210;
+          const H = 297;
+          const M = 14;
+          const right = W - M;
+          const contentW = W - (M * 2);
+          const safe = (value) =>
+            String(value ?? "")
+              .replace(/[^\x20-\x7E]/g, "-")
+              .replace(/\s+/g, " ")
+              .trim();
+
+          let pageNo = 1;
+
+          const addHeader = (continuation = false) => {
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(0, 0, W, 25, "F");
+
+            pdf.setFillColor(204, 255, 0);
+            pdf.rect(M, 7, 9, 9, "F");
+
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(10);
+            pdf.text("CF", M + 4.5, 13.3, { align: "center" });
+
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(17);
+            pdf.text("CGPAFORGE", M + 14, 14);
+
+            pdf.setFontSize(7.5);
+            pdf.text("IPU ACADEMIC CALCULATION REPORT", right, 10, { align: "right" });
+
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(6.8);
+            pdf.setTextColor(204, 255, 0);
+            pdf.text("CALCULATE. PLAN. IMPROVE.", right, 17, { align: "right" });
+
+            if (!continuation) {
+              pdf.setTextColor(10, 10, 10);
+              pdf.setFont("helvetica", "bold");
+              pdf.setFontSize(9);
+              pdf.text(`Session: ${safe(semesterTitle) || "Current IPU Semester"}`, M, 33);
+
+              pdf.setFont("helvetica", "normal");
+              pdf.setFontSize(8);
+              pdf.setTextColor(80, 80, 80);
+              pdf.text(
+                `Generated: ${new Date().toLocaleString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}`,
+                right,
+                33,
+                { align: "right" }
+              );
+            } else {
+              pdf.setTextColor(80, 80, 80);
+              pdf.setFont("helvetica", "normal");
+              pdf.setFontSize(8);
+              pdf.text(`CGPAForge · ${safe(semesterTitle)}`, M, 33);
+            }
+          };
+
+          const addFooter = () => {
+            pdf.setDrawColor(210, 210, 205);
+            pdf.setLineWidth(0.25);
+            pdf.line(M, H - 16, right, H - 16);
+
+            pdf.setTextColor(90, 90, 90);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(6.7);
+            pdf.text("CGPAForge · Independent student utility · Not an official university transcript", M, H - 10);
+
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", "bold");
+            pdf.text(`PAGE ${pageNo}`, right, H - 10, { align: "right" });
+          };
+
+          const addNewPage = () => {
+            addFooter();
+            pdf.addPage();
+            pageNo += 1;
+            addHeader(true);
+            return 41;
+          };
+
+          const sectionTitle = (title, y, accent = [204, 255, 0]) => {
+            pdf.setFillColor(...accent);
+            pdf.rect(M, y - 5, 4, 7, "F");
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(10);
+            pdf.text(title, M + 7, y);
+            return y + 7;
+          };
+
+          const drawMetricBox = (x, y, w, h, label, value, accent = [244, 244, 240]) => {
+            pdf.setFillColor(...accent);
+            pdf.rect(x, y, w, h, "F");
+            pdf.setDrawColor(10, 10, 10);
+            pdf.setLineWidth(0.5);
+            pdf.rect(x, y, w, h, "S");
+            pdf.setTextColor(80, 80, 80);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(6.5);
+            pdf.text(label.toUpperCase(), x + 4, y + 7);
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text(String(value), x + 4, y + 17);
+          };
+
+          // ---------- Derived report metrics ----------
+          const validRows = subjects.filter((s) => {
+            const cred = Number(s.credits);
+            const pt = Number(s.point);
+            const validMarks = s.mode !== "marks" || (
+              s.marks !== "" &&
+              Number.isFinite(Number(s.marks)) &&
+              Number(s.marks) >= 0 &&
+              Number(s.marks) <= 100
+            );
+            return validMarks && Number.isFinite(cred) && cred > 0 && Number.isFinite(pt) && pt >= 0 && pt <= 10;
+          });
+
+          const markedRows = subjects.filter((s) =>
+            s.mode === "marks" &&
+            s.marks !== "" &&
+            Number.isFinite(Number(s.marks)) &&
+            Number(s.marks) >= 0 &&
+            Number(s.marks) <= 100
+          );
+
+          const markedCreditTotal = markedRows.reduce((sum, s) => sum + (Number(s.credits) || 0), 0);
+          const marksAverage = markedRows.length
+            ? markedRows.reduce((sum, s) => sum + Number(s.marks), 0) / markedRows.length
+            : null;
+          const creditWeightedMarks = markedCreditTotal > 0
+            ? markedRows.reduce((sum, s) => sum + (Number(s.marks) * Number(s.credits)), 0) / markedCreditTotal
+            : null;
+
+          const totalCourses = subjects.length;
+          const gradeOnlyCount = subjects.filter((s) => s.mode === "grade").length;
+          const completeMarksCoverage = markedRows.length === totalCourses;
+          const divisionTitle = currentSGPAMetrics.division?.title || "—";
+
+          // ---------- Page 1: Summary + detailed table ----------
+          addHeader(false);
+
+          let y = 44;
+
+          pdf.setTextColor(10, 10, 10);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(20);
+          pdf.text("SEMESTER PERFORMANCE REPORT", M, y);
+          y += 7;
+
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(90, 90, 90);
+          pdf.text(
+            "Credit-weighted calculation using the configured IPU grading methodology.",
+            M,
+            y
+          );
+          y += 9;
+
+          const boxGap = 4;
+          const boxW = (contentW - (boxGap * 3)) / 4;
+          drawMetricBox(M, y, boxW, 25, "SGPA", `${currentSGPAMetrics.sgpa} / 10`, [204, 255, 0]);
+          drawMetricBox(M + boxW + boxGap, y, boxW, 25, "IPU % Equivalent", `${currentSGPAMetrics.percentage}%`, [255, 184, 0]);
+          drawMetricBox(M + (boxW + boxGap) * 2, y, boxW, 25, "Total Credits", currentSGPAMetrics.totalCredits, [244, 244, 240]);
+          drawMetricBox(M + (boxW + boxGap) * 3, y, boxW, 25, "Quality Points", currentSGPAMetrics.totalQualityPoints.toFixed(2), [255, 248, 231]);
+          y += 34;
+
+          pdf.setFillColor(244, 244, 240);
+          pdf.setDrawColor(10, 10, 10);
+          pdf.setLineWidth(0.5);
+          pdf.rect(M, y, contentW, 24, "FD");
+
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(7);
+          pdf.setTextColor(80, 80, 80);
+          pdf.text("CLASSIFICATION", M + 5, y + 7);
+          pdf.setTextColor(10, 10, 10);
+          pdf.setFontSize(11);
+          pdf.text(divisionTitle, M + 5, y + 16);
+
+          pdf.setTextColor(80, 80, 80);
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(7);
+          pdf.text(
+            safe(currentSGPAMetrics.division?.detail || "Complete entries to determine classification."),
+            M + 65,
+            y + 9
+          );
+
+          pdf.setTextColor(10, 10, 10);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(7);
+          pdf.text("COURSES", right - 48, y + 7);
+          pdf.text("MARKS ENTERED", right - 48, y + 14);
+          pdf.text("GRADE-ONLY", right - 48, y + 21);
+
+          pdf.setFont("helvetica", "normal");
+          pdf.text(String(totalCourses), right - 5, y + 7, { align: "right" });
+          pdf.text(`${markedRows.length}/${totalCourses}`, right - 5, y + 14, { align: "right" });
+          pdf.text(String(gradeOnlyCount), right - 5, y + 21, { align: "right" });
+
+          y += 32;
+
+          y = sectionTitle("COURSE-BY-COURSE BREAKDOWN", y);
+
+          // 8 columns: Subject / Credits / Credit % / Marks / Marks % / Grade / GP / Quality
+          const col = [M, 70, 87, 108, 127, 149, 166, 181];
+          const widths = [54, 15, 19, 19, 22, 17, 15, 14];
+
+          const drawTableHeader = () => {
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(M, y - 5, contentW, 10, "F");
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(6.4);
+            [
+              ["SUBJECT", col[0] + 2],
+              ["CRED", col[1] + 2],
+              ["CREDIT %", col[2] + 2],
+              ["MARKS", col[3] + 2],
+              ["MARKS %", col[4] + 2],
+              ["GRADE", col[5] + 2],
+              ["GP", col[6] + 2],
+              ["QUALITY", col[7] + 1]
+            ].forEach(([label, x]) => pdf.text(label, x, y + 1));
+            y += 9;
+          };
+
+          drawTableHeader();
+
+          subjects.forEach((s, idx) => {
+            if (y > 260) {
+              y = addNewPage();
+              y = sectionTitle("COURSE-BY-COURSE BREAKDOWN · CONTINUED", y);
+              drawTableHeader();
+            }
+
+            const credits = Number(s.credits) || 0;
+            const marks = s.mode === "marks" && s.marks !== "" ? Number(s.marks) : null;
+            const marksPct = marks !== null && Number.isFinite(marks) ? `${marks.toFixed(2)}%` : "—";
+            const creditPct = currentSGPAMetrics.totalCredits > 0 && credits > 0
+              ? `${((credits / currentSGPAMetrics.totalCredits) * 100).toFixed(2)}%`
+              : "—";
+            const point = Number(s.point);
+            const quality = Number.isFinite(point) && credits > 0 ? (credits * point).toFixed(2) : "—";
+
+            if (idx % 2 === 0) {
+              pdf.setFillColor(248, 248, 244);
+              pdf.rect(M, y - 5, contentW, 9, "F");
+            }
+
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", idx % 2 === 0 ? "normal" : "normal");
+            pdf.setFontSize(6.8);
+
+            const subjectName = safe(s.name || `Subject ${idx + 1}`);
+            const clippedName = pdf.splitTextToSize(subjectName, widths[0] - 3)[0] || "";
+
+            pdf.text(clippedName, col[0] + 2, y);
+            pdf.text(String(credits || "—"), col[1] + 2, y);
+            pdf.text(creditPct, col[2] + 1, y);
+            pdf.text(marks === null || !Number.isFinite(marks) ? "—" : String(marks), col[3] + 2, y);
+            pdf.text(marksPct, col[4] + 1, y);
+            pdf.text(safe(s.grade || "—"), col[5] + 2, y);
+            pdf.text(Number.isFinite(point) ? String(point) : "—", col[6] + 2, y);
+            pdf.text(quality, col[7] + 1, y);
+
+            pdf.setDrawColor(225, 225, 220);
+            pdf.setLineWidth(0.2);
+            pdf.line(M, y + 4, right, y + 4);
+
+            y += 9;
+          });
+
+          y += 3;
+          pdf.setDrawColor(10, 10, 10);
+          pdf.setLineWidth(0.5);
+          pdf.line(M, y, right, y);
+          y += 7;
+
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(7.5);
+          pdf.text(`TOTAL`, M + 2, y);
+          pdf.text(String(currentSGPAMetrics.totalCredits), col[1] + 2, y);
+          pdf.text("100.00%", col[2] + 1, y);
+          pdf.text(markedRows.length ? `${markedRows.length} entered` : "—", col[3] + 2, y);
+          pdf.text(completeMarksCoverage ? `${marksAverage.toFixed(2)}% avg` : "partial", col[4] + 1, y);
+          pdf.text(`${currentSGPAMetrics.validCount}/${totalCourses}`, col[5] + 2, y);
+          pdf.text("—", col[6] + 2, y);
+          pdf.text(currentSGPAMetrics.totalQualityPoints.toFixed(2), col[7] + 1, y);
+
+          // Page 1 summary notes.
+          y += 14;
+          if (y > 255) y = addNewPage();
+
+          y = sectionTitle("MARKS & CREDIT ANALYSIS", y, [255, 184, 0]);
+
+          const analysisItems = [
+            [
+              "Average Marks %",
+              marksAverage !== null ? `${marksAverage.toFixed(2)}%` : "Not available",
+              "Simple average of subjects where marks were entered."
+            ],
+            [
+              "Credit-weighted Marks %",
+              creditWeightedMarks !== null ? `${creditWeightedMarks.toFixed(2)}%` : "Not available",
+              "Weighted by credits; excludes grade-only subjects."
+            ],
+            [
+              "Credit Coverage",
+              currentSGPAMetrics.totalCredits > 0 ? "100.00%" : "0.00%",
+              "Share of total calculated credits represented by the entered course rows."
+            ]
+          ];
+
+          analysisItems.forEach(([label, value, detail], idx) => {
+            if (y > 265) y = addNewPage();
+            pdf.setFillColor(idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 248 : 255, idx % 2 === 0 ? 244 : 255);
+            pdf.rect(M, y - 5, contentW, 12, "F");
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(7);
+            pdf.text(label, M + 3, y + 1);
+            pdf.setFont("helvetica", "bold");
+            pdf.text(value, 82, y + 1);
+            pdf.setFont("helvetica", "normal");
+            pdf.setTextColor(90, 90, 90);
+            pdf.setFontSize(6.5);
+            pdf.text(detail, 112, y + 1);
+            y += 12;
+          });
+
+          // ---------- Page 2 / continuation: Methodology + scale ----------
+          y = addNewPage();
+          y = sectionTitle("IPU CALCULATION METHODOLOGY", y, [204, 255, 0]);
+
+          pdf.setFillColor(255, 248, 231);
+          pdf.setDrawColor(10, 10, 10);
+          pdf.rect(M, y - 2, contentW, 31, "FD");
+
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(8);
+          pdf.setTextColor(10, 10, 10);
+          pdf.text("WEIGHTED FORMULA", M + 5, y + 7);
+
+          pdf.setFont("courier", "bold");
+          pdf.setFontSize(12);
+          pdf.text("SGPA / CGPA = SUM(Credits x Grade Points) / SUM(Credits)", M + 5, y + 17);
+
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(7);
+          pdf.setTextColor(80, 80, 80);
+          pdf.text(
+            "Each course contributes according to its credit value. The calculated result is rounded to 2 decimal places.",
+            M + 5,
+            y + 25
+          );
+          y += 40;
+
+          y = sectionTitle("IPU GRADE SCALE", y);
+
+          const gradeRows = [
+            ["90-100", "O", "10"],
+            ["75-89", "A+", "9"],
+            ["65-74", "A", "8"],
+            ["55-64", "B+", "7"],
+            ["50-54", "B", "6"],
+            ["45-49", "C", "5"],
+            ["40-44", "P", "4"],
+            ["Below 40 / Absent", "F", "0"]
+          ];
+
+          const gradeX = [M, M + 82, M + 119];
+          pdf.setFillColor(10, 10, 10);
+          pdf.rect(M, y - 5, contentW, 9, "F");
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(7);
+          pdf.text("MARKS", gradeX[0] + 3, y);
+          pdf.text("GRADE", gradeX[1] + 3, y);
+          pdf.text("GRADE POINT", gradeX[2] + 3, y);
+          y += 9;
+
+          gradeRows.forEach((row, idx) => {
+            if (idx % 2 === 0) {
+              pdf.setFillColor(248, 248, 244);
+              pdf.rect(M, y - 5, contentW, 9, "F");
+            }
+            pdf.setTextColor(10, 10, 10);
+            pdf.setFont("helvetica", idx === 0 ? "bold" : "normal");
+            pdf.setFontSize(7.5);
+            pdf.text(row[0], gradeX[0] + 3, y);
+            pdf.text(row[1], gradeX[1] + 3, y);
+            pdf.text(row[2], gradeX[2] + 3, y);
+            y += 9;
+          });
+
+          y += 8;
+          y = sectionTitle("REPORT INTERPRETATION", y, [51, 102, 255]);
+
+          const notes = [
+            `IPU percentage equivalent shown in this report: CGPA x 10 = ${safe(currentSGPAMetrics.percentage)}%.`,
+            "Marks % is shown only where an exact numeric mark was entered. A letter grade alone does not determine an exact marks percentage.",
+            "Credit % shows each subject's share of the total credits counted in this SGPA calculation.",
+            "Quality Points = Credits x Grade Point for each subject.",
+            "The report is a calculation aid, not an official marksheet, transcript, or university-issued document."
+          ];
+
+          notes.forEach((note, idx) => {
+            if (y > 267) y = addNewPage();
+            pdf.setFillColor(idx === 0 ? 204 : 244, idx === 0 ? 255 : 244, idx === 0 ? 0 : 240);
+            pdf.rect(M, y - 4, 4, 6, "F");
+            pdf.setTextColor(30, 30, 30);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(7);
+            const lines = pdf.splitTextToSize(note, contentW - 10);
+            pdf.text(lines, M + 8, y);
+            y += (lines.length * 4) + 5;
+          });
+
+          y += 4;
+          y = sectionTitle("CREATED BY", y, [255, 102, 204]);
+
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(9);
+          pdf.setTextColor(10, 10, 10);
+          pdf.text("Abhishek Rathi", M, y + 2);
+
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(7);
+          pdf.setTextColor(51, 102, 255);
+          const linkedin = "linkedin.com/in/abhishek-rathi-385b30380/";
+          if (typeof pdf.textWithLink === "function") {
+            pdf.textWithLink(linkedin, M, y + 8, {
+              url: "https://www.linkedin.com/in/abhishek-rathi-385b30380/"
+            });
+          } else {
+            pdf.text(linkedin, M, y + 8);
+          }
+
+          addFooter();
+
+          const filename = safe(semesterTitle)
+            .replace(/[^a-zA-Z0-9_-]/g, "_")
+            .slice(0, 65) || "semester";
+
+          pdf.save(`CGPAForge_${filename}_Report.pdf`);
+        } catch (err) {
+          console.error("PDF export failed", err);
+          setExportError("Unable to generate the PDF. Please retry or use Print > Save as PDF.");
+        } finally {
+          setIsExporting(false);
+        }
+      };
+      const handleExportPNG = async () => {
+        const element = document.getElementById("transcript-export-area");
+        if (!element) return;
+
+        try {
+          const canvas = await html2canvas(element, { scale: 2, backgroundColor: "#FFFFFF" });
+          const link = document.createElement("a");
+          link.download = `CGPAForge_IPU_Transcript.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          console.error("PNG export error:", err);
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col font-sans selection:bg-brand-lime selection:text-brand-black">
+          {/* Top Bar Banner with Academic Positioning */}
+          <div className="bg-brand-black text-brand-offwhite px-4 py-2 text-xs font-mono border-b-2 border-brand-black flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <span className="w-2.5 h-2.5 bg-brand-lime inline-block border border-black"></span>
+              <span className="font-semibold tracking-wider">IPU ACADEMIC CALCULATION ENGINE 2026</span>
+              <span className="text-gray-400 hidden sm:inline">— GGSIPU ORDINANCE 11 WEIGHTED FORMULA</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-brand-lime">NO LOGIN REQUIRED</span>
+              <span className="text-gray-300 hidden md:inline">100% IN-BROWSER</span>
+            </div>
+          </div>
+
+          {/* Primary Product Header */}
+          <header className="bg-brand-white border-b-hard px-4 sm:px-8 py-5">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-brand-lime border-hard flex items-center justify-center font-mono font-bold text-xl tracking-tighter shadow-hard-sm">
+                  CF
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand-black leading-none flex items-center gap-2">
+                    CGPAFORGE
+                    <span className="text-xs bg-brand-black text-brand-lime px-2 py-0.5 font-mono uppercase tracking-widest border border-black">
+                      IPU EDITION
+                    </span>
+                  </h1>
+                  <p className="text-xs font-mono text-gray-700 tracking-wider mt-1">
+                    CALCULATE. PLAN. IMPROVE.
+                  </p>
+                </div>
+              </div>
+
+              {/* Navigation Tabs */}
+              <nav className="flex flex-wrap gap-1 sm:gap-2 bg-brand-offwhite p-1 border-hard shadow-hard-sm" aria-label="Main Navigation">
+                <button
+                  onClick={() => setActiveTab("sgpa")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "sgpa"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  SGPA Calculator
+                </button>
+                <button
+                  onClick={() => setActiveTab("cgpa")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "cgpa"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  CGPA Multi-Sem
+                </button>
+                <button
+                  onClick={() => setActiveTab("target")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "target"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  Target CGPA
+                </button>
+                <button
+                  onClick={() => setActiveTab("whatif")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "whatif"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  What-If
+                </button>
+                <button
+                  onClick={() => setActiveTab("scale")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "scale"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  IPU Scale
+                </button>
+                <button
+                  onClick={() => setActiveTab("history")}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold uppercase transition-all ${
+                    activeTab === "history"
+                      ? "bg-brand-lime text-brand-black border-hard shadow-hard-sm"
+                      : "text-brand-black hover:bg-white"
+                  }`}
+                >
+                  History ({history.length})
+                </button>
+              </nav>
+            </div>
+          </header>
+
+          {/* Quick Informational Strip */}
+          <div className="bg-brand-cream border-b-2 border-brand-black px-4 py-2">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-xs font-mono gap-2">
+              <div className="flex items-center gap-2">
+                <span className="font-bold bg-brand-black text-brand-white px-1.5 py-0.5">RULE CHECK</span>
+                <span>Percentage Equivalent = CGPA × 10 | Weighted by Course Credits Σ(C × G) / ΣC</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <a href="#methodology" className="underline hover:text-brand-blue">
+                  Methodology & Ordinance Details →
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {}
+          <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-8">
+
+            {/* TAB 1: SGPA CALCULATOR */}
+            {activeTab === "sgpa" && (
+              <div className="space-y-6">
+                {/* Control bar */}
+                <div className="bg-brand-white border-hard p-4 sm:p-5 shadow-hard flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                  <div className="w-full lg:w-auto">
+                    <span className="text-xs font-mono text-gray-500 uppercase tracking-wider block">Academic Session Label</span>
+                    <input
+                      type="text"
+                      value={semesterTitle}
+                      onChange={(e) => setSemesterTitle(e.target.value)}
+                      placeholder="e.g. BCA Semester IV (2025-26)"
+                      className="text-lg sm:text-xl font-bold border-b-2 border-brand-black bg-transparent focus:bg-yellow-50 px-1 py-0.5 w-full sm:w-80 outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                    <button
+                      onClick={handleAddSubject}
+                      className="bg-brand-lime text-brand-black px-3.5 py-2 font-mono font-bold text-xs uppercase border-hard shadow-hard-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-1.5"
+                    >
+                      <i data-lucide="plus" className="w-4 h-4"></i> Add Subject
+                    </button>
+                    <button
+                      onClick={handleLoadSample}
+                      className="bg-white text-brand-black px-3 py-2 font-mono font-bold text-xs uppercase border-hard shadow-hard-sm hover:bg-gray-100 transition-all flex items-center gap-1.5"
+                      title="Load typical 6-course IPU semester"
+                    >
+                      <i data-lucide="layers" className="w-4 h-4"></i> Load Sample
+                    </button>
+                    <button
+                      onClick={() => setShowResetModal(true)}
+                      className="bg-white text-brand-red px-3 py-2 font-mono font-bold text-xs uppercase border-hard shadow-hard-sm hover:bg-red-50 transition-all flex items-center gap-1.5"
+                    >
+                      <i data-lucide="refresh-cw" className="w-4 h-4"></i> Reset
+                    </button>
+                    <button
+                      onClick={handleExportPDF}
+                      disabled={isExporting}
+                      className="bg-brand-black text-brand-white px-3.5 py-2 font-mono font-bold text-xs uppercase border-hard shadow-hard-sm hover:bg-gray-900 transition-all flex items-center gap-1.5 ml-auto"
+                    >
+                      <i data-lucide="download" className="w-4 h-4"></i> {isExporting ? "Exporting..." : "Export PDF"}
+                    </button>
+                  </div>
+                </div>
+
+                {exportError && <div role="alert" className="border-2 border-brand-red bg-red-50 text-brand-red p-3 font-mono text-xs font-bold">{exportError} <button className="underline ml-2" onClick={handlePrint}>Print instead</button></div>}
+                {/* Primary Two-Column Layout: Subject Table & Live Metric Instrument */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                  {/* Subject Input Matrix (8 cols on desktop) */}
+                  <div className="lg:col-span-8 bg-brand-white border-hard shadow-hard p-4 sm:p-6">
+                    <div className="flex justify-between items-center mb-4 pb-2 border-b-2 border-brand-black">
+                      <div>
+                        <h2 className="font-extrabold text-lg sm:text-xl tracking-tight">COURSE MARKS & CREDITS</h2>
+                        <p className="text-xs font-mono text-gray-500">Enter your marks or grade. Marks % and each subject's credit share calculate automatically.</p>
+                      </div>
+                      <span className="font-mono text-xs font-bold bg-brand-offwhite px-2 py-1 border border-black">
+                        {subjects.length} COURSES ENTERED
+                      </span>
+                    </div>
+
+                    {/* Table View for larger screens, Card Stack for mobile */}
+                    <div className="table-container">
+                      <table className="w-full text-left border-collapse min-w-[620px]">
+                        <thead>
+                          <tr className="bg-brand-black text-brand-offwhite font-mono text-xs uppercase border-b-2 border-brand-black">
+                            <th className="py-2.5 px-3">Subject / Paper</th>
+                            <th className="py-2.5 px-3 w-20">Credits</th>
+                            <th className="py-2.5 px-3 w-20 text-center">Credit %</th>
+                            <th className="py-2.5 px-3 w-36">Mode</th>
+                            <th className="py-2.5 px-3 w-24">Score</th>
+                            <th className="py-2.5 px-3 w-20 text-center">Marks %</th>
+                            <th className="py-2.5 px-3 w-20 text-center">Grade</th>
+                            <th className="py-2.5 px-3 w-24 text-right">Points</th>
+                            <th className="py-2.5 px-3 w-12 text-center">Del</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y-2 divide-gray-200 font-mono text-sm">
+                          {subjects.map((subj, idx) => {
+                            const cred = parseFloat(subj.credits) || 0;
+                            const pt = parseFloat(subj.point) || 0;
+                            const qualityPoints = subj.point === null || (subj.mode === "marks" && (subj.marks === "" || subj.marks < 0 || subj.marks > 100)) ? "—" : (cred * pt).toFixed(1);
+                            const isMarkInvalid = subj.mode === "marks" && (subj.marks < 0 || subj.marks > 100 || subj.marks === "");
+                            const numericMarks = subj.mode === "marks" && subj.marks !== "" ? Number(subj.marks) : null;
+                            const marksPercentage = numericMarks !== null && Number.isFinite(numericMarks) && numericMarks >= 0 && numericMarks <= 100
+                              ? `${numericMarks.toFixed(2)}%`
+                              : "—";
+                            const creditPercentage = currentSGPAMetrics.totalCredits > 0 && cred > 0
+                              ? `${((cred / currentSGPAMetrics.totalCredits) * 100).toFixed(2)}%`
+                              : "—";
+
+                            return (
+                              <tr key={subj.id} className="hover:bg-yellow-50 transition-colors">
+                                {/* Subject Name */}
+                                <td className="py-3 px-3">
+                                  <input
+                                    type="text"
+                                    value={subj.name}
+                                    onChange={(e) => handleSubjectChange(subj.id, "name", e.target.value)}
+                                    placeholder="e.g. Data Structures"
+                                    className="w-full font-sans font-medium text-sm border border-gray-300 focus:border-brand-black p-1.5 rounded-none bg-white"
+                                  />
+                                </td>
+
+                                {/* Credits */}
+                                <td className="py-3 px-3">
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    max="30"
+                                    step="1"
+                                    value={subj.credits}
+                                    onChange={(e) => handleSubjectChange(subj.id, "credits", e.target.value)}
+                                    className={`w-full font-mono text-center font-bold p-1.5 border ${
+                                      subj.credits <= 0 ? "border-brand-red bg-red-50" : "border-gray-300 focus:border-brand-black"
+                                    }`}
+                                  />
+                                </td>
+
+                                {/* Automatic Credit Percentage */}
+                                <td className="py-3 px-3 text-center font-mono">
+                                  <span className={`inline-block px-1.5 py-0.5 border text-[11px] font-bold ${
+                                    creditPercentage === "—"
+                                      ? "border-gray-300 text-gray-400"
+                                      : "border-brand-black bg-brand-cream text-brand-black"
+                                  }`}>
+                                    {creditPercentage}
+                                  </span>
+                                </td>
+
+                                {/* Entry Mode Toggle */}
+                                <td className="py-3 px-3">
+                                  <div className="flex border border-brand-black p-0.5 bg-gray-100 text-[10px] font-mono">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSubjectChange(subj.id, "mode", "marks")}
+                                      className={`flex-1 py-1 text-center font-bold ${
+                                        subj.mode === "marks" ? "bg-brand-black text-white" : "text-gray-700 hover:bg-gray-200"
+                                      }`}
+                                    >
+                                      MARKS
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSubjectChange(subj.id, "mode", "grade")}
+                                      className={`flex-1 py-1 text-center font-bold ${
+                                        subj.mode === "grade" ? "bg-brand-black text-white" : "text-gray-700 hover:bg-gray-200"
+                                      }`}
+                                    >
+                                      GRADE
+                                    </button>
+                                  </div>
+                                </td>
+
+                                {/* Input based on Mode */}
+                                <td className="py-3 px-3">
+                                  {subj.mode === "marks" ? (
+                                    <div>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={subj.marks}
+                                        onChange={(e) => handleSubjectChange(subj.id, "marks", e.target.value)}
+                                        placeholder="0-100"
+                                        className={`w-full font-mono text-center font-bold p-1.5 border ${
+                                          isMarkInvalid ? "border-brand-red bg-red-50 text-brand-red" : "border-gray-300 focus:border-brand-black"
+                                        }`}
+                                      />
+                                      {isMarkInvalid && (
+                                        <span className="text-[10px] text-brand-red block font-mono mt-0.5">0-100 only</span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <select
+                                      value={subj.grade}
+                                      onChange={(e) => handleSubjectChange(subj.id, "grade", e.target.value)}
+                                      className="w-full font-mono font-bold p-1.5 border border-gray-300 bg-white focus:border-brand-black"
+                                    >
+                                      {IPU_RULES.gradingScale.map(g => (
+                                        <option key={g.grade} value={g.grade}>
+                                          {g.grade} ({g.point} pts)
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                </td>
+
+                                {/* Automatic Marks Percentage */}
+                                <td className="py-3 px-3 text-center font-mono">
+                                  <span className={`inline-block px-1.5 py-0.5 border text-[11px] font-bold ${
+                                    marksPercentage === "—"
+                                      ? "border-gray-300 text-gray-400"
+                                      : "border-brand-black bg-lime-50 text-brand-black"
+                                  }`}>
+                                    {marksPercentage}
+                                  </span>
+                                </td>
+
+                                {/* Calculated Grade Display */}
+                                <td className="py-3 px-3 text-center">
+                                  <span className={`inline-block font-mono font-extrabold px-2 py-0.5 border text-xs ${
+                                    subj.grade === "O" ? "bg-brand-lime border-black" :
+                                    subj.grade === "A+" || subj.grade === "A" ? "bg-green-100 border-green-800 text-green-900" :
+                                    subj.grade === "B+" || subj.grade === "B" ? "bg-blue-100 border-blue-800 text-blue-900" :
+                                    subj.grade === "C" || subj.grade === "P" ? "bg-yellow-100 border-yellow-800 text-yellow-900" :
+                                    "bg-red-100 border-red-800 text-red-900"
+                                  }`}>
+                                    {subj.grade}
+                                  </span>
+                                </td>
+
+                                {/* Quality Points: Credits * Grade Point */}
+                                <td className="py-3 px-3 text-right font-mono">
+                                  <span className="text-xs text-gray-500 font-normal mr-1">{subj.point === null ? "Awaiting marks" : `${subj.credits}×${subj.point}=`}</span>
+                                  <span className="font-bold">{qualityPoints}</span>
+                                </td>
+
+                                {/* Delete row */}
+                                <td className="py-3 px-3 text-center">
+                                  <button
+                                    onClick={() => handleRemoveSubject(subj.id)}
+                                    disabled={subjects.length <= 1}
+                                    title="Remove subject"
+                                    className="text-gray-400 hover:text-brand-red disabled:opacity-20 p-1"
+                                  >
+                                    <i data-lucide="trash-2" className="w-4 h-4"></i>
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <p className="mt-3 text-[11px] font-mono text-gray-600">Eight editable subjects are provided by default. Remove unused rows or add more subjects.</p>
+                    {/* Table Bottom Control & Total Summary */}
+                    <div className="mt-4 pt-3 border-t-2 border-brand-black flex flex-col sm:flex-row justify-between items-center gap-3">
+                      <button
+                        onClick={handleAddSubject}
+                        className="text-xs font-mono font-bold uppercase underline hover:text-brand-blue flex items-center gap-1"
+                      >
+                        + Add another paper row
+                      </button>
+
+                      <div className="flex items-center gap-6 font-mono text-xs">
+                        <div>
+                          <span className="text-gray-500">TOTAL CREDITS:</span>{" "}
+                          <span className="font-extrabold text-sm">{currentSGPAMetrics.totalCredits}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">TOTAL QUALITY PTS:</span>{" "}
+                          <span className="font-extrabold text-sm">{currentSGPAMetrics.totalQualityPoints}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Result Instrument Panel (4 cols on desktop) */}
+                  <div className="lg:col-span-4 space-y-6">
+                    <div className="bg-brand-white border-hard shadow-hard p-5 sm:p-6 border-t-8 border-t-brand-lime">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-mono font-bold tracking-widest text-gray-500 uppercase">
+                          CALCULATED RESULT
+                        </span>
+                        <span className="w-2 h-2 bg-brand-green rounded-full animate-ping"></span>
+                      </div>
+
+                      <div className="mt-3">
+                        <span className="text-xs font-mono text-gray-600 block">SEMESTER GRADE POINT AVERAGE</span>
+                        <div className="flex items-baseline space-x-2">
+                          <span className="text-5xl sm:text-6xl font-extrabold font-mono text-brand-black tracking-tight">
+                            {hasEnteredMarks ? currentSGPAMetrics.sgpa : "—"}
+                          </span>
+                          <span className="font-mono text-sm text-gray-500">/ 10.00</span>
+                        </div>
+                      </div>
+
+                      {/* Percentage Equivalent and Division */}
+                      <div className="mt-6 pt-4 border-t-2 border-brand-black space-y-3 font-mono text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">SGPA × 10 (estimate):</span>
+                          <span className="font-bold text-sm bg-brand-yellow px-2 py-0.5 border border-black">
+                            {hasEnteredMarks ? `${currentSGPAMetrics.percentage}%` : "—"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-gray-600">CGPA division reference:</span>
+                          <div className="text-right">
+                            <span className="font-bold text-brand-black block">
+                              {currentSGPAMetrics.validCount && !currentSGPAMetrics.hasErrors ? "See cumulative CGPA" : "—"}
+                            </span>
+                            <span className="text-[10px] text-gray-500 block max-w-[180px]">
+                              Division is determined using overall CGPA, not an individual SGPA.
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Total Credits Counted:</span>
+                          <span className="font-bold">{currentSGPAMetrics.totalCredits}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Quality Points Sum:</span>
+                          <span className="font-bold">{currentSGPAMetrics.totalQualityPoints}</span>
+                        </div>
+                      </div>
+
+                      {currentSGPAMetrics.hasErrors && <p role="status" className="mt-3 text-xs font-mono text-brand-red">Enter valid marks or select grades for all eight subjects. Delete unused rows.</p>}
+                      {/* Save to History Button */}
+                      <div className="mt-6 pt-4 border-t-2 border-dashed border-gray-300">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Tag name (e.g. Sem 4 Final)"
+                            value={saveLabel}
+                            onChange={(e) => setSaveLabel(e.target.value)}
+                            className="text-xs font-mono p-2 border border-brand-black flex-grow outline-none"
+                          />
+                          <button
+                            onClick={handleSaveCalculation}
+                            className="bg-brand-black text-brand-white text-xs font-mono font-bold px-3 py-2 hover:bg-gray-800 transition-colors whitespace-nowrap"
+                          >
+                            Save
+                          </button>
+                        </div>
+                        {showSaveToast && (
+                          <span className="text-[11px] font-mono text-brand-green font-bold block mt-1.5">
+                            ✓ Saved to browser storage!
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Quick Formula Transparency Card */}
+                    <div className="bg-brand-cream border-hard p-4 font-mono text-xs">
+                      <div className="font-bold uppercase tracking-wider text-brand-black mb-2 flex items-center gap-1.5">
+                        <i data-lucide="info" className="w-4 h-4"></i> IPU FORMULA TRANSPARENCY
+                      </div>
+                      <div className="bg-white p-2.5 border border-black text-center font-bold my-2 text-xs leading-relaxed">
+                        SGPA = Σ(Credits × Grade Points) / Σ(Credits)
+                      </div>
+                      <p className="text-[11px] text-gray-700 leading-normal">
+                        Rounded to 2 decimal places. SGPA × 10 is shown as an indicative value; official percentage equivalence uses overall CGPA.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mathematical Calculation Breakdown Accordion */}
+                <div className="bg-brand-white border-hard shadow-hard p-5">
+                  <div
+                    onClick={() => setShowCalculationsBreakdown(!showCalculationsBreakdown)}
+                    className="flex justify-between items-center cursor-pointer select-none"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-brand-lime border border-black inline-block"></span>
+                      <h3 className="font-bold text-sm sm:text-base font-mono uppercase">
+                        STEP-BY-STEP CALCULATION AUDIT LOG
+                      </h3>
+                    </div>
+                    <span className="font-mono text-xs underline font-bold">
+                      {showCalculationsBreakdown ? "[ HIDE BREAKDOWN ]" : "[ SHOW DETAILED MATH ]"}
+                    </span>
+                  </div>
+
+                  {showCalculationsBreakdown && (
+                    <div className="mt-4 pt-3 border-t-2 border-brand-black font-mono text-xs space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {subjects.map((s, idx) => (
+                          <div key={s.id} className="bg-brand-offwhite p-2.5 border border-black">
+                            <span className="font-bold text-gray-800 block truncate">{s.name || `Subject ${idx + 1}`}</span>
+                            <div className="flex justify-between text-gray-600 mt-1">
+                              <span>Formula:</span>
+                              <span className="font-bold text-black">{s.point === null ? "Enter marks or grade" : `${s.credits} cred × ${s.point} pts = ${(s.credits * s.point).toFixed(1)}`}</span>
+                            </div>
+                            <div className="flex justify-between text-gray-500 text-[10px]">
+                              <span>Grade Awarded:</span>
+                              <span>{s.grade} {s.mode === "marks" ? `(${s.marks} marks)` : "(Direct)"}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-brand-black text-brand-white p-3 font-mono mt-3">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
+                          <span>
+                            Total Quality Points = {subjects.map(s => `${s.credits * s.point}`).join(" + ")} = <strong className="text-brand-lime">{currentSGPAMetrics.totalQualityPoints}</strong>
+                          </span>
+                          <span>
+                            Total Credits = {subjects.map(s => `${s.credits}`).join(" + ")} = <strong className="text-brand-lime">{currentSGPAMetrics.totalCredits}</strong>
+                          </span>
+                        </div>
+                        <div className="mt-2 pt-2 border-t border-gray-700 text-sm font-bold text-brand-lime">
+                          Final SGPA = {currentSGPAMetrics.totalQualityPoints} / {currentSGPAMetrics.totalCredits} = {currentSGPAMetrics.sgpa}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: MULTI-SEMESTER CGPA CALCULATOR */}
+            {activeTab === "cgpa" && (
+              <div className="space-y-6">
+                <div className="bg-brand-white border-hard p-5 shadow-hard">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b-2 border-brand-black">
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">CUMULATIVE GRADE POINT AVERAGE (CGPA)</h2>
+                      <p className="text-xs font-mono text-gray-600 mt-0.5">
+                        Credit-weighted multi-semester accumulation Σ(SGPA × Credits) / Σ(Credits).
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleAddSemester}
+                      className="bg-brand-lime text-brand-black px-4 py-2 font-mono font-bold text-xs uppercase border-hard shadow-hard-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                    >
+                      + Add Semester
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+                    {/* Semester Inputs */}
+                    <div className="lg:col-span-8">
+                      <div className="table-container">
+                        <table className="w-full text-left border-collapse min-w-[480px]">
+                          <thead>
+                            <tr className="bg-brand-black text-brand-offwhite font-mono text-xs uppercase border-b-2 border-brand-black">
+                              <th className="py-2.5 px-3">Semester</th>
+                              <th className="py-2.5 px-3 w-32">SGPA Obtained</th>
+                              <th className="py-2.5 px-3 w-32">Semester Credits</th>
+                              <th className="py-2.5 px-3 w-32 text-right">Weighted Product</th>
+                              <th className="py-2.5 px-3 w-16 text-center">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y-2 divide-gray-200 font-mono text-sm">
+                            {semesters.map((sem) => {
+                              const cred = parseFloat(sem.credits) || 0;
+                              const sg = parseFloat(sem.sgpa) || 0;
+                              const prod = (cred * sg).toFixed(2);
+
+                              return (
+                                <tr key={sem.id} className="hover:bg-yellow-50">
+                                  <td className="py-3 px-3">
+                                    <input
+                                      type="text"
+                                      value={sem.name}
+                                      onChange={(e) => handleSemesterChange(sem.id, "name", e.target.value)}
+                                      className="w-full font-sans font-bold text-sm border border-gray-300 focus:border-brand-black p-1.5"
+                                    />
+                                  </td>
+                                  <td className="py-3 px-3">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      max="10"
+                                      value={sem.sgpa}
+                                      onChange={(e) => handleSemesterChange(sem.id, "sgpa", e.target.value)}
+                                      className="w-full font-mono text-center font-bold p-1.5 border border-gray-300 focus:border-brand-black"
+                                    />
+                                  </td>
+                                  <td className="py-3 px-3">
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="40"
+                                      value={sem.credits}
+                                      onChange={(e) => handleSemesterChange(sem.id, "credits", e.target.value)}
+                                      className="w-full font-mono text-center font-bold p-1.5 border border-gray-300 focus:border-brand-black"
+                                    />
+                                  </td>
+                                  <td className="py-3 px-3 text-right font-mono font-bold">
+                                    {prod}
+                                  </td>
+                                  <td className="py-3 px-3 text-center">
+                                    <button
+                                      onClick={() => handleRemoveSemester(sem.id)}
+                                      disabled={semesters.length <= 1}
+                                      className="text-gray-400 hover:text-brand-red disabled:opacity-20"
+                                    >
+                                      <i data-lucide="trash-2" className="w-4 h-4"></i>
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* CGPA Summary Readout */}
+                    <div className="lg:col-span-4 bg-brand-offwhite border-hard p-5 font-mono space-y-4">
+                      <span className="text-xs uppercase font-bold text-gray-500 block">OVERALL DEGREE CGPA</span>
+                      <div className="flex items-baseline space-x-2">
+                        <span className="text-5xl font-extrabold text-brand-black">
+                          {currentCGPAMetrics.cgpa}
+                        </span>
+                        <span className="text-sm text-gray-500">/ 10.00</span>
+                      </div>
+
+                      <div className="pt-4 border-t-2 border-brand-black space-y-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">IPU Percentage:</span>
+                          <span className="font-extrabold bg-brand-yellow px-2 py-0.5 border border-black">
+                            {currentCGPAMetrics.percentage}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Division:</span>
+                          <span className="font-extrabold text-right">{currentCGPAMetrics.division.title}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Total Degree Credits:</span>
+                          <span className="font-bold">{currentCGPAMetrics.totalCredits}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-300 text-[11px] text-gray-600 leading-normal">
+                        Note: Simple average of SGPAs is mathematically inaccurate when semesters carry different total credits. CGPAForge strictly computes credit-weighted cumulative performance.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: TARGET CGPA CALCULATOR */}
+            {activeTab === "target" && (
+              <div className="space-y-6">
+                <div className="bg-brand-white border-hard p-6 shadow-hard">
+                  <div className="max-w-2xl mb-6">
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">TARGET CGPA PLANNER</h2>
+                    <p className="text-xs font-mono text-gray-600 mt-1">
+                      Compute the exact required SGPA across remaining academic semesters to reach your graduation goal.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Inputs */}
+                    <div className="space-y-4 font-mono">
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 block mb-1">CURRENT CUMULATIVE CGPA</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="10"
+                          value={targetCurrentCGPA}
+                          onChange={(e) => setTargetCurrentCGPA(e.target.value)}
+                          className="w-full text-base font-bold p-2.5 border-hard bg-brand-offwhite"
+                        />
+                        <span className="text-[11px] text-gray-500">Your current standing up to last semester</span>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 block mb-1">TOTAL COMPLETED CREDITS</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="200"
+                          value={targetCompletedCredits}
+                          onChange={(e) => setTargetCompletedCredits(e.target.value)}
+                          className="w-full text-base font-bold p-2.5 border-hard bg-brand-offwhite"
+                        />
+                        <span className="text-[11px] text-gray-500">Sum of credits in semesters passed</span>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 block mb-1">DESIRED TARGET CGPA</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="10"
+                          value={targetDesiredCGPA}
+                          onChange={(e) => setTargetDesiredCGPA(e.target.value)}
+                          className="w-full text-base font-bold p-2.5 border-hard bg-brand-offwhite"
+                        />
+                        <span className="text-[11px] text-gray-500">Target CGPA required for placement/higher studies</span>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 block mb-1">REMAINING CREDITS TO COMPLETE</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="150"
+                          value={targetRemainingCredits}
+                          onChange={(e) => setTargetRemainingCredits(e.target.value)}
+                          className="w-full text-base font-bold p-2.5 border-hard bg-brand-offwhite"
+                        />
+                        <span className="text-[11px] text-gray-500">Credits in upcoming semesters until degree completion</span>
+                      </div>
+                    </div>
+
+                    {/* Output Instrument Card */}
+                    <div className="bg-brand-offwhite border-hard p-6 flex flex-col justify-between">
+                      {targetAnalysis.valid ? (
+                        <div>
+                          <span className="text-xs font-mono font-bold uppercase text-gray-500 block mb-1">
+                            MATHEMATICAL FEASIBILITY ANALYSIS
+                          </span>
+
+                          <div className="my-4">
+                            <span className="text-xs font-mono text-gray-600 block">REQUIRED AVERAGE SGPA IN FUTURE SEMESTERS</span>
+                            <div className="flex items-baseline space-x-2">
+                              <span className={`text-5xl font-extrabold font-mono ${
+                                targetAnalysis.isPossible ? "text-brand-black" : "text-brand-red"
+                              }`}>
+                                {targetAnalysis.requiredAvgSGPA}
+                              </span>
+                              <span className="font-mono text-sm text-gray-500">/ 10.00</span>
+                            </div>
+                          </div>
+
+                          {targetAnalysis.isPossible ? (
+                            <div className="p-3 bg-brand-lime border border-black font-mono text-xs space-y-1">
+                              <span className="font-extrabold block text-brand-black">✓ TARGET IS MATHEMATICALLY REACHABLE</span>
+                              <p className="text-gray-900 leading-tight">
+                                You need to maintain an average grade point of <strong>{targetAnalysis.requiredAvgSGPA}</strong> across all remaining {targetRemainingCredits} credits.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-red-100 border border-brand-red font-mono text-xs space-y-1">
+                              <span className="font-extrabold block text-brand-red">✕ TARGET NOT REACHABLE WITH THESE CREDITS</span>
+                              <p className="text-gray-800 leading-tight">
+                                Because the maximum obtainable SGPA in IPU is 10.00, requiring an average of <strong>{targetAnalysis.requiredAvgSGPA}</strong> is mathematically impossible with the remaining {targetRemainingCredits} credits.
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="mt-5 pt-4 border-t-2 border-brand-black font-mono text-xs space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Total Degree Credits:</span>
+                              <span className="font-bold">{targetAnalysis.totalCredits}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Current Accumulated Points:</span>
+                              <span className="font-bold">{targetAnalysis.currentPoints}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Total Points Required for Target:</span>
+                              <span className="font-bold">{targetAnalysis.targetTotalPoints}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Deficit Points Needed:</span>
+                              <span className="font-bold">{targetAnalysis.requiredFuturePoints}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs font-mono text-brand-red p-4 border border-brand-red bg-red-50">
+                          {targetAnalysis.error}
+                        </div>
+                      )}
+
+                      <div className="mt-4 pt-3 border-t border-gray-300 font-mono text-[11px] text-gray-500">
+                        Formula: Required SGPA = [Target CGPA × (Comp + Rem) - (Cur CGPA × Comp)] / Rem
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: WHAT-IF SIMULATOR */}
+            {activeTab === "whatif" && (
+              <div className="space-y-6">
+                <div className="bg-brand-white border-hard p-6 shadow-hard">
+                  <div className="max-w-2xl mb-6">
+                    <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">WHAT-IF GRADE SIMULATOR</h2>
+                    <p className="text-xs font-mono text-gray-600 mt-1">
+                      Isolate any single course in your active semester and test what happens if your grade improves or slips.
+                    </p>
+                  </div>
+
+                  {subjects.length === 0 ? (
+                    <p className="font-mono text-xs text-brand-red">Please add at least one subject in the SGPA calculator first.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4 font-mono">
+                        <div>
+                          <label className="text-xs font-bold text-gray-700 block mb-1">SELECT SUBJECT TO TEST</label>
+                          <select
+                            value={whatIfSubjectId}
+                            onChange={(e) => setWhatIfSubjectId(e.target.value)}
+                            className="w-full text-sm font-bold p-2.5 border-hard bg-white"
+                          >
+                            {subjects.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.name} ({s.credits} Credits, Current: {s.grade} - {s.point} pts)
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-gray-700 block mb-1">TEST HYPOTHETICAL NEW GRADE</label>
+                          <select
+                            value={whatIfHypotheticalGrade}
+                            onChange={(e) => setWhatIfHypotheticalGrade(e.target.value)}
+                            className="w-full text-sm font-bold p-2.5 border-hard bg-white"
+                          >
+                            {IPU_RULES.gradingScale.map(g => (
+                              <option key={g.grade} value={g.grade}>
+                                Grade {g.grade} ({g.point} Points - {g.description})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="p-3 bg-brand-cream border border-black text-xs leading-normal">
+                          <strong>Note:</strong> What-If simulations do not overwrite your actual entered grades. You can test re-evaluations or exam performance risk-free.
+                        </div>
+                      </div>
+
+                      {whatIfMetrics && (
+                        <div className="bg-brand-offwhite border-hard p-6 font-mono space-y-4">
+                          <span className="text-xs font-bold text-gray-500 uppercase block">SIMULATION COMPARISON</span>
+
+                          <div className="grid grid-cols-2 gap-4 pt-2">
+                            <div className="bg-white p-3 border border-black">
+                              <span className="text-[11px] text-gray-500 block">CURRENT SGPA</span>
+                              <span className="text-2xl font-extrabold text-brand-black">{currentSGPAMetrics.sgpa}</span>
+                              <span className="text-[10px] text-gray-500 block mt-1">{whatIfMetrics.targetSubject.grade} ({whatIfMetrics.targetSubject.point} pts)</span>
+                            </div>
+
+                            <div className="bg-white p-3 border border-black">
+                              <span className="text-[11px] text-gray-500 block">SIMULATED SGPA</span>
+                              <span className="text-2xl font-extrabold text-brand-black">{whatIfMetrics.simulatedSGPA}</span>
+                              <span className="text-[10px] text-gray-500 block mt-1">{whatIfMetrics.simulatedGrade} ({whatIfMetrics.simulatedPoint} pts)</span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 border-2 border-brand-black bg-brand-white flex items-center justify-between">
+                            <div>
+                              <span className="text-xs font-bold text-gray-600 block">NET SGPA IMPACT</span>
+                              <span className="text-xs text-gray-500">Weight: {whatIfMetrics.targetSubject.credits} credits</span>
+                            </div>
+                            <span className={`text-xl font-extrabold px-3 py-1 border border-black ${
+                              whatIfMetrics.isGain ? "bg-brand-lime text-black" :
+                              whatIfMetrics.isLoss ? "bg-brand-red text-white" :
+                              "bg-gray-200 text-black"
+                            }`}>
+                              {whatIfMetrics.difference}
+                            </span>
+                          </div>
+
+                          <div className="text-[11px] text-gray-600">
+                            Subject affected: <strong>{whatIfMetrics.targetSubject.name}</strong>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: IPU GRADING SCALE & QUICK LOOKUP */}
+            {activeTab === "scale" && (
+              <div className="space-y-6">
+                <div className="bg-brand-white border-hard p-6 shadow-hard">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b-2 border-brand-black">
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">IPU STATUTORY GRADING SCALE</h2>
+                      <p className="text-xs font-mono text-gray-600 mt-0.5">
+                        Standard Guru Gobind Singh Indraprastha University (GGSIPU) marks-to-grade point scheme.
+                      </p>
+                    </div>
+
+                    {/* Quick Marks -> Grade Finder */}
+                    <div className="flex items-center gap-2 bg-brand-offwhite p-2 border border-black font-mono">
+                      <span className="text-xs font-bold whitespace-nowrap">QUICK MARKS CHECK:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={quickMarksInput}
+                        onChange={(e) => setQuickMarksInput(e.target.value)}
+                        className="w-16 p-1 text-center font-bold border border-black bg-white"
+                      />
+                      {(() => {
+                        const info = IPU_RULES.getGradeInfoByMarks(Number(quickMarksInput));
+                        return info ? (
+                          <span className="text-xs font-extrabold bg-brand-lime px-2 py-1 border border-black">
+                            {info.grade} ({info.point} pts)
+                          </span>
+                        ) : (
+                          <span className="text-xs text-brand-red font-bold">Invalid</span>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="table-container mt-6">
+                    <table className="w-full text-left border-collapse font-mono text-xs sm:text-sm">
+                      <thead>
+                        <tr className="bg-brand-black text-brand-offwhite uppercase">
+                          <th className="py-3 px-4">Marks Range</th>
+                          <th className="py-3 px-4">Letter Grade</th>
+                          <th className="py-3 px-4">Grade Point</th>
+                          <th className="py-3 px-4">Qualitative Performance</th>
+                          <th className="py-3 px-4">Condition / Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y-2 divide-gray-200">
+                        {IPU_RULES.gradingScale.map((row) => {
+                          const isHighlighted = Number(quickMarksInput) >= row.min && Number(quickMarksInput) <= row.max;
+                          return (
+                            <tr
+                              key={row.grade}
+                              className={`transition-colors ${
+                                isHighlighted ? "bg-brand-lime font-bold border-y-2 border-black" : "hover:bg-yellow-50"
+                              }`}
+                            >
+                              <td className="py-3 px-4 font-bold">{row.min} – {row.max}</td>
+                              <td className="py-3 px-4">
+                                <span className="inline-block px-2 py-0.5 border border-black font-extrabold bg-white">
+                                  {row.grade}
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 font-bold">{row.point}</td>
+                              <td className="py-3 px-4">{row.description}</td>
+                              <td className="py-3 px-4 text-gray-600 text-xs">
+                                {row.point === 10 ? "Maximum grade point" :
+                                 row.point === 4  ? "Minimum passing grade point" :
+                                 row.point === 0  ? "Fail / Reappear in end-term" : "Credit earned"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Division Classification Table */}
+                  <div className="mt-8 pt-6 border-t-2 border-brand-black">
+                    <h3 className="font-extrabold text-base font-mono mb-3 uppercase">IPU DIVISION CLASSIFICATION SYSTEM</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+                      <div className="bg-brand-offwhite p-3 border border-black">
+                        <span className="font-extrabold block text-sm">CGPA 10.00</span>
+                        <span className="font-bold text-brand-green block mt-1">Exemplary Performance</span>
+                        <p className="text-[10px] text-gray-600 mt-1">First-attempt pass across all courses in stipulated time.</p>
+                      </div>
+                      <div className="bg-brand-offwhite p-3 border border-black">
+                        <span className="font-extrabold block text-sm">CGPA 6.50 & Above</span>
+                        <span className="font-bold text-black block mt-1">First Division</span>
+                        <p className="text-[10px] text-gray-600 mt-1">Standard cutoff for top placements & graduate programs.</p>
+                      </div>
+                      <div className="bg-brand-offwhite p-3 border border-black">
+                        <span className="font-extrabold block text-sm">CGPA 5.00 – 6.49</span>
+                        <span className="font-bold text-black block mt-1">Second Division</span>
+                        <p className="text-[10px] text-gray-600 mt-1">Valid standard undergraduate degree award.</p>
+                      </div>
+                      <div className="bg-brand-offwhite p-3 border border-black">
+                        <span className="font-extrabold block text-sm">CGPA 4.00 – 4.99</span>
+                        <span className="font-bold text-black block mt-1">Third Division</span>
+                        <p className="text-[10px] text-gray-600 mt-1">Minimum qualifying threshold for graduation.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: CALCULATION HISTORY */}
+            {activeTab === "history" && (
+              <div className="space-y-6">
+                <div className="bg-brand-white border-hard p-6 shadow-hard">
+                  <div className="flex justify-between items-center pb-4 border-b-2 border-brand-black">
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">LOCAL CALCULATION VAULT</h2>
+                      <p className="text-xs font-mono text-gray-600 mt-0.5">
+                        Saved in your browser local storage. Never uploaded to any external server.
+                      </p>
+                    </div>
+                    <span className="font-mono text-xs bg-brand-black text-brand-white px-2.5 py-1">
+                      {history.length} SAVED SESSIONS
+                    </span>
+                  </div>
+
+                  {history.length === 0 ? (
+                    <div className="py-12 text-center font-mono">
+                      <p className="text-gray-500 text-sm">No saved calculations in your browser yet.</p>
+                      <button
+                        onClick={() => setActiveTab("sgpa")}
+                        className="mt-3 bg-brand-lime text-brand-black px-4 py-2 font-bold text-xs uppercase border-hard shadow-hard-sm"
+                      >
+                        Go to SGPA Calculator & Save Session
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                      {history.map((item) => (
+                        <div key={item.id} className="bg-brand-offwhite border-hard p-4 font-mono text-xs flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start">
+                              <span className="font-bold text-sm text-brand-black">{item.title}</span>
+                              <span className="text-[10px] bg-white px-1.5 py-0.5 border border-black">{item.date}</span>
+                            </div>
+                            <div className="my-3 flex items-baseline gap-2">
+                              <span className="text-3xl font-extrabold text-brand-black">{item.score}</span>
+                              <span className="text-gray-500 font-bold">{item.type}</span>
+                              <span className="text-gray-400">({item.credits} Credits)</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 pt-3 border-t border-gray-300">
+                            <button
+                              onClick={() => handleLoadHistory(item)}
+                              className="flex-1 bg-brand-black text-brand-white py-1.5 text-center font-bold hover:bg-gray-800"
+                            >
+                              Load Session
+                            </button>
+                            <button
+                              onClick={() => handleDeleteHistory(item.id)}
+                              className="px-2.5 py-1.5 border border-brand-red text-brand-red hover:bg-red-50"
+                              title="Delete record"
+                            >
+                              <i data-lucide="trash-2" className="w-3.5 h-3.5"></i>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {}
+            <div className="print-transcript-container">
+              <div id="transcript-export-area" className="p-8 bg-white text-black font-sans w-[800px] border-4 border-black">
+                <div className="border-b-4 border-black pb-4 mb-4 flex justify-between items-start">
+                  <div>
+                    <h1 className="text-2xl font-black tracking-tight">CGPAFORGE — IPU TRANSCRIPT REPORT</h1>
+                    <p className="text-xs font-mono text-gray-700">Guru Gobind Singh Indraprastha University Methodology</p>
+                    <p className="text-xs font-mono font-bold mt-1">Session: {semesterTitle}</p>
+                  </div>
+                  <div className="text-right font-mono text-xs">
+                    <div>Date: {new Date().toLocaleDateString("en-IN")}</div>
+                    <div>Source: GGSIPU Ordinance 11</div>
+                  </div>
+                </div>
+
+                <table className="w-full text-left border-collapse font-mono text-xs mb-6">
+                  <thead>
+                    <tr className="border-b-2 border-black">
+                      <th className="py-1">Course Paper</th>
+                      <th className="py-1 text-center">Credits</th>
+                      <th className="py-1 text-center">Marks</th>
+                      <th className="py-1 text-center">Grade</th>
+                      <th className="py-1 text-center">Grade Point</th>
+                      <th className="py-1 text-right">Quality Points</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {subjects.map((s, idx) => (
+                      <tr key={idx} className="border-b border-gray-300">
+                        <td className="py-1.5 font-sans font-medium">{s.name}</td>
+                        <td className="py-1.5 text-center">{s.credits}</td>
+                        <td className="py-1.5 text-center">{s.mode === "marks" ? s.marks : "—"}</td>
+                        <td className="py-1.5 text-center font-bold">{s.grade}</td>
+                        <td className="py-1.5 text-center">{s.point}</td>
+                        <td className="py-1.5 text-right font-bold">{(s.credits * s.point).toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div className="border-t-2 border-black pt-4 grid grid-cols-2 gap-4 font-mono text-xs">
+                  <div>
+                    <div>Total Credits Counted: <strong>{currentSGPAMetrics.totalCredits}</strong></div>
+                    <div>Total Quality Points: <strong>{currentSGPAMetrics.totalQualityPoints}</strong></div>
+                    <div>Formula: Σ(Credits × Grade Points) / ΣCredits</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-black">SGPA: {currentSGPAMetrics.sgpa} / 10.00</div>
+                    <div>Percentage Equivalent: <strong>{currentSGPAMetrics.percentage}%</strong></div>
+                    <div>Division: <strong>{currentSGPAMetrics.division.title}</strong></div>
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-gray-400 text-[10px] font-mono text-gray-600">
+                  Disclaimer: CGPAForge is an independent academic computation tool. Results must be verified with official GGSIPU Gazette results for formal academic certification.
+                </div>
+              </div>
+            </div>
+
+            {}
+            <section id="methodology" className="bg-brand-white border-hard shadow-hard p-6 sm:p-8 space-y-6">
+              <div className="border-b-2 border-brand-black pb-4">
+                <span className="text-xs font-mono font-bold bg-brand-lime px-2 py-0.5 border border-black uppercase">
+                  AUTHORITATIVE SPECIFICATIONS
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-2">
+                  HOW IPU SGPA & CGPA ARE CALCULATED
+                </h2>
+                <p className="text-xs font-mono text-gray-600 mt-1">
+                  Reference: Guru Gobind Singh Indraprastha University Examination Regulations & Ordinance 11.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm leading-relaxed">
+                <div className="space-y-4">
+                  <h3 className="font-bold text-base font-mono uppercase text-brand-black">
+                    1. The Credit-Weighted Methodology
+                  </h3>
+                  <p className="text-gray-800">
+                    Unlike ordinary arithmetic averages, GGSIPU calculates both SGPA and CGPA weighted by the credit value of each subject. Higher-credit subjects (such as 4-credit core theory subjects) have four times the mathematical weight of a 1-credit laboratory.
+                  </p>
+                  <div className="p-3 bg-brand-offwhite border border-black font-mono text-xs">
+                    Quality Points = Course Credits (Cni) × Grade Point (Gni)<br/>
+                    SGPA = Σ Quality Points / Σ Course Credits
+                  </div>
+
+                  <h3 className="font-bold text-base font-mono uppercase text-brand-black mt-6">
+                    2. Percentage Conversion Formula
+                  </h3>
+                  <p className="text-gray-800">
+                    Many students mistakenly apply CBSE or generic university conversion rules such as <em>CGPA × 9.5</em>. Under statutory IPU norms:
+                  </p>
+                  <div className="p-3 bg-brand-yellow border border-black font-mono text-xs font-bold">
+                    IPU Percentage Equivalent (%) = CGPA × 10
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    This conversion is clearly recognized on official IPU provisional and degree certificates.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-bold text-base font-mono uppercase text-brand-black">
+                    3. Marks Boundaries & Rounding Rule
+                  </h3>
+                  <p className="text-gray-800">
+                    IPU enforces strict boundary brackets. For instance, obtaining <strong>74 marks</strong> grants an <strong>A (8 grade points)</strong>, whereas <strong>75 marks</strong> grants an <strong>A+ (9 grade points)</strong>. The cumulative final value is rounded to two decimal places.
+                  </p>
+
+                  <h3 className="font-bold text-base font-mono uppercase text-brand-black mt-6">
+                    4. Division Classification Thresholds
+                  </h3>
+                  <ul className="space-y-2 font-mono text-xs">
+                    <li className="flex justify-between p-1.5 border-b border-gray-200">
+                      <span>CGPA 6.50 and above</span>
+                      <strong className="text-brand-green">First Division</strong>
+                    </li>
+                    <li className="flex justify-between p-1.5 border-b border-gray-200">
+                      <span>CGPA 5.00 to 6.49</span>
+                      <strong>Second Division</strong>
+                    </li>
+                    <li className="flex justify-between p-1.5 border-b border-gray-200">
+                      <span>CGPA 4.00 to 4.99</span>
+                      <strong>Third Division</strong>
+                    </li>
+                    <li className="flex justify-between p-1.5 border-b border-gray-200">
+                      <span>CGPA 10.00</span>
+                      <strong className="bg-brand-lime px-1">Exemplary Performance</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            {}
+            <section className="bg-brand-white border-hard shadow-hard p-6 sm:p-8 space-y-6">
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight font-mono uppercase">
+                FREQUENTLY ASKED QUESTIONS (FAQ)
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 border-2 border-brand-black bg-brand-offwhite">
+                  <h3 className="font-bold text-sm text-brand-black mb-1">What is the IPU CGPA formula?</h3>
+                  <p className="text-xs text-gray-700 leading-normal font-sans">
+                    The IPU CGPA formula is Σ(Cni × Gni) / ΣCni, where Cni represents course credits and Gni represents the grade points earned in that course, computed across all completed semesters.
+                  </p>
+                </div>
+
+                <div className="p-4 border-2 border-brand-black bg-brand-offwhite">
+                  <h3 className="font-bold text-sm text-brand-black mb-1">Does IPU use CGPA × 9.5 for percentage?</h3>
+                  <p className="text-xs text-gray-700 leading-normal font-sans">
+                    No. The 9.5 multiplier is commonly used by CBSE and other boards. GGSIPU officially defines the percentage equivalent as <strong>CGPA × 10</strong>.
+                  </p>
+                </div>
+
+                <div className="p-4 border-2 border-brand-black bg-brand-offwhite">
+                  <h3 className="font-bold text-sm text-brand-black mb-1">What grade point is an A+ in IPU?</h3>
+                  <p className="text-xs text-gray-700 leading-normal font-sans">
+                    In IPU, marks between 75 and 89 yield the letter grade <strong>A+</strong>, corresponding to <strong>9 grade points</strong>.
+                  </p>
+                </div>
+
+                <div className="p-4 border-2 border-brand-black bg-brand-offwhite">
+                  <h3 className="font-bold text-sm text-brand-black mb-1">Are my marks uploaded to a database?</h3>
+                  <p className="text-xs text-gray-700 leading-normal font-sans">
+                    No. CGPAForge operates completely client-side in your web browser. No accounts, logins, or cloud databases are used.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </main>
+
+          {}
+          {showResetModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+              <div className="bg-brand-white border-hard-thick shadow-hard-xl p-6 max-w-sm w-full font-mono">
+                <h3 className="text-base font-extrabold uppercase text-brand-red mb-2">RESET CALCULATOR DATA?</h3>
+                <p className="text-xs text-gray-700 mb-6">
+                  This will clear your active subject inputs and reset back to clean defaults. This action cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowResetModal(false)}
+                    className="flex-1 bg-white text-brand-black border-2 border-black py-2 text-xs font-bold hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleResetCalculator}
+                    className="flex-1 bg-brand-red text-white border-2 border-black py-2 text-xs font-bold hover:bg-red-700"
+                  >
+                    Confirm Reset
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          <footer className="bg-brand-black text-brand-offwhite border-t-hard mt-12 py-8 px-4 sm:px-8 font-mono text-xs">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 bg-brand-lime border border-black inline-block"></span>
+                  <span className="font-extrabold text-sm text-white">CGPAFORGE</span>
+                  <span className="text-gray-400">/ The IPU Academic Utility</span>
+                </div>
+                <p className="text-brand-lime text-[11px] mt-2"><a href="https://www.linkedin.com/in/abhishek-rathi-385b30380/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Created by Abhishek Rathi ↗</a></p>
+                <p className="text-gray-400 text-[11px] mt-1 max-w-md">
+                  Built specifically for students of Guru Gobind Singh Indraprastha University across B.Tech, BCA, BBA, LLB, and MCA programs.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-4 text-xs">
+                <button onClick={() => setActiveTab("sgpa")} className="hover:text-brand-lime underline">SGPA Tool</button>
+                <button onClick={() => setActiveTab("cgpa")} className="hover:text-brand-lime underline">CGPA Multi-Sem</button>
+                <button onClick={() => setActiveTab("target")} className="hover:text-brand-lime underline">Target Planner</button>
+                <button onClick={() => setActiveTab("scale")} className="hover:text-brand-lime underline">IPU Grading Table</button>
+                <a href="#methodology" className="hover:text-brand-lime underline">Methodology</a>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto mt-6 pt-4 border-t border-gray-800 text-[10px] text-gray-500 leading-normal">
+              <div className="mb-3 text-brand-offwhite font-semibold">Created by <a href="https://www.linkedin.com/in/abhishek-rathi-385b30380/" target="_blank" rel="noopener noreferrer" className="text-brand-lime underline hover:text-white">Abhishek Rathi ↗</a></div>
+              Disclaimer: CGPAForge is an independent student educational utility and is not affiliated with, endorsed by, or operated by Guru Gobind Singh Indraprastha University (GGSIPU). Always verify your provisional mark sheets and end-term degree notifications with the official GGSIPU examination division for high-stakes academic purposes.
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    const { useState, useEffect, useMemo } = React;
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
